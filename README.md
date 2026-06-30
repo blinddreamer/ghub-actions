@@ -1,6 +1,6 @@
 # GitHub Actions Self-Hosted Runner (Docker)
 
-A Dockerized GitHub Actions self-hosted runner with Docker-outside-of-Docker (DooD) support, targeting the `gnom4o/meta-trader-app` repository.
+A Dockerized GitHub Actions self-hosted runner with Docker-outside-of-Docker (DooD) support.
 
 ## How it works
 
@@ -27,10 +27,10 @@ The `DOCKER_GID` build arg matches the runner user's group to the host `docker` 
 ### 2. Run the container
 
 ```bash
-docker run -d --name meta-trader-runner \
-  -e REPO_URL="https://github.com/gnom4o/meta-trader-app" \
+docker run -d --name my-runner \
+  -e REPO_URL="https://github.com/<owner>/<repo>" \
   -e RUNNER_TOKEN="<fresh-token>" \
-  -e RUNNER_NAME="meta-trader-docker" \
+  -e RUNNER_NAME="my-runner" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   gha-runner
 ```
@@ -46,7 +46,7 @@ docker run -d --name meta-trader-runner \
 ### Stop and deregister
 
 ```bash
-docker stop meta-trader-runner
+docker stop my-runner
 ```
 
 The container's `EXIT` trap automatically calls `config.sh remove`, cleanly deregistering the runner from GitHub before it exits.

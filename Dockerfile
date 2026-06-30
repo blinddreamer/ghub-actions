@@ -33,5 +33,5 @@ RUN groupadd -g ${DOCKER_GID} docker || groupmod -g ${DOCKER_GID} docker \
 RUN chown -R runner:runner /home/runner
 USER runner
 
-COPY entrypoint.sh /home/runner/entrypoint.sh
+COPY --chmod=755 entrypoint.sh /home/runner/entrypoint.sh
 ENTRYPOINT ["/home/runner/entrypoint.sh"]
