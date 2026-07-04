@@ -42,7 +42,7 @@ docker run -d --name my-runner \
 | `REPO_URL` | yes | — | GitHub repository URL to register against |
 | `RUNNER_TOKEN` | yes | — | Registration token from GitHub |
 | `RUNNER_NAME` | no | `docker-runner` | Display name shown in GitHub UI |
-| `GH_PAT` | no | — | Fine-grained PAT with **Administration: Read & write** on the repo. Used to mint a fresh removal token at shutdown so deregistration doesn't fail if `RUNNER_TOKEN` has expired (registration tokens last ~1 hour). Without it, removal falls back to `RUNNER_TOKEN` and may silently no-op if that token is already stale. |
+| `GH_PAT` | no | — | Fine-grained PAT with **Administration: Read & write** on the repo. Used to mint a fresh removal token at shutdown so deregistration doesn't fail if `RUNNER_TOKEN` has expired (registration tokens last ~1 hour). Without it, removal falls back to `RUNNER_TOKEN`; if that's also stale, `entrypoint.sh` logs a warning to the container's stderr rather than failing silently. |
 
 ### Stop and deregister
 
@@ -50,7 +50,7 @@ docker run -d --name my-runner \
 docker stop my-runner
 ```
 
-The container's `EXIT` trap automatically calls `config.sh remove`, cleanly deregistering the runner from GitHub before it exits. If `GH_PAT` is set, the trap fetches a fresh registration token from the GitHub API first, so removal still works even if `RUNNER_TOKEN` has expired by the time the container stops.
+The container's `EXIT` trap automatically calls `config.sh remove`, cleanly deregistering the runner from GitHub before it exits. If `GH_PAT` is set, the trap first fetches a fresh **removal** token from GitHub's `remove-token` API endpoint (distinct from the registration-token endpoint used at startup), so removal still works even if `RUNNER_TOKEN` has expired by the time the container stops.
 
 ## Build arguments
 
