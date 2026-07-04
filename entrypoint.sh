@@ -7,7 +7,7 @@ get_fresh_removal_token() {
   curl -sf -X POST \
     -H "Authorization: Bearer ${GH_PAT}" \
     -H "Accept: application/vnd.github+json" \
-    "https://api.github.com/repos/${OWNER_REPO}/actions/runners/registration-token" \
+    "https://api.github.com/repos/${OWNER_REPO}/actions/runners/remove-token" \
     | jq -r .token
 }
 
