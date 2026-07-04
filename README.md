@@ -42,6 +42,7 @@ docker run -d --name my-runner \
 | `REPO_URL` | yes | — | GitHub repository URL to register against |
 | `RUNNER_TOKEN` | yes | — | Registration token from GitHub |
 | `RUNNER_NAME` | no | `docker-runner` | Display name shown in GitHub UI |
+| `GH_PAT` | no | — | Fine-grained PAT with **Administration: Read & write** on the repo. Used to mint a fresh removal token at shutdown so deregistration doesn't fail if `RUNNER_TOKEN` has expired (registration tokens last ~1 hour). Without it, removal falls back to `RUNNER_TOKEN` and may silently no-op if that token is already stale. |
 
 ### Stop and deregister
 
@@ -49,7 +50,7 @@ docker run -d --name my-runner \
 docker stop my-runner
 ```
 
-The container's `EXIT` trap automatically calls `config.sh remove`, cleanly deregistering the runner from GitHub before it exits.
+The container's `EXIT` trap automatically calls `config.sh remove`, cleanly deregistering the runner from GitHub before it exits. If `GH_PAT` is set, the trap fetches a fresh registration token from the GitHub API first, so removal still works even if `RUNNER_TOKEN` has expired by the time the container stops.
 
 ## Build arguments
 
@@ -64,3 +65,4 @@ The container's `EXIT` trap automatically calls `config.sh remove`, cleanly dere
 - **`--replace`** is set in `entrypoint.sh`, so restarting the container with the same `RUNNER_NAME` won't error with "runner already exists".
 - **DooD caveat** — if a workflow step does `-v $(pwd):/app`, the path resolves to the runner container's filesystem path, not the host path. Use absolute host paths or named volumes when mounting inside workflow steps.
 - **No `svc.sh`** — `run.sh` runs in the foreground as PID 1, which is the correct Docker pattern (no systemd inside the container).
+- **`GH_PAT` scope** — only needs `Administration: Read & write` on the target repo (that's what the registration-token endpoint requires). Pass it in via a secrets manager or `--env-file`, not baked into the image.
