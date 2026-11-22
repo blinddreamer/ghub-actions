@@ -1,9 +1,9 @@
 FROM ubuntu:22.04
 
-ARG RUNNER_VERSION=2.329.0
+ARG RUNNER_VERSION=2.338.2
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     curl jq git sudo libicu70 ca-certificates gnupg lsb-release \
     && rm -rf /var/lib/apt/lists/*
 
@@ -19,11 +19,13 @@ RUN install -m 0755 -d /etc/apt/keyrings \
 RUN useradd -m runner
 WORKDIR /home/runner
 
+# The bundled node runs actions but never calls npm; drop npm, its bundled deps carry CVEs
 RUN curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -L \
     https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
     && tar xzf actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
     && rm actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
-    && ./bin/installdependencies.sh
+    && ./bin/installdependencies.sh \
+    && rm -rf externals/node*/lib/node_modules/npm externals/node*/bin/npm externals/node*/bin/npx
 
 # Match the host docker.sock GID so the runner user can use it without root
 ARG DOCKER_GID=999

@@ -1,0 +1,6 @@
+# Docker buildx/compose plugins (installed with docker-ce-cli) are already the latest release;
+# Docker has not shipped fixes yet. Remove these once a newer plugin release lands.
+# github.com/moby/go-archive v0.2.0 -> 0.3.0
+CVE-2026-17106
+# golang.org/x/net v0.60.0 -> 0.62.0
+CVE-2026-78661
