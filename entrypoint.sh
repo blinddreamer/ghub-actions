@@ -30,6 +30,21 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# RUNNER_TOKEN is single-use and expires after an hour, so a restarted container can't
+# re-register with it. With GH_PAT set, mint a fresh registration token on every start.
+if [ -n "${GH_PAT}" ]; then
+  fresh="$(curl -sf --max-time 10 -X POST \
+    -H "Authorization: Bearer ${GH_PAT}" \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/repos/${OWNER_REPO}/actions/runners/registration-token" \
+    | jq -r .token)" || fresh=""
+  if [ -n "${fresh}" ] && [ "${fresh}" != "null" ]; then
+    RUNNER_TOKEN="${fresh}"
+  else
+    echo "entrypoint: could not get a fresh registration token from GitHub, falling back to RUNNER_TOKEN" >&2
+  fi
+fi
+
 ./config.sh --url "${REPO_URL}" \
   --token "${RUNNER_TOKEN}" \
   --name "${RUNNER_NAME:-docker-runner}" \

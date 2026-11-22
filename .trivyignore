@@ -4,3 +4,7 @@
 CVE-2026-17106
 # golang.org/x/net v0.60.0 -> 0.62.0
 CVE-2026-78661
+
+# actions/runner 2.338.2 (latest) still bundles Microsoft.AspNetCore.WebUtilities 8.0.25.
+# Remove once a runner release ships >= 8.0.34.
+CVE-2026-114149
